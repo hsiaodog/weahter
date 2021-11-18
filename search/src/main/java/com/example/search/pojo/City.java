@@ -2,7 +2,9 @@ package com.example.search.pojo;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class City {
-    private Integer woeid;
+    private List<Integer> data;
 }

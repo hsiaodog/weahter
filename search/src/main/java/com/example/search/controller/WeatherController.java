@@ -12,8 +12,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 public class WeatherController {
@@ -28,8 +31,12 @@ public class WeatherController {
         this.weatherService = weatherService;
     }
 
+//    @GetMapping("/weather")
+//    public ResponseEntity<?> queryWeatherByCity(@RequestParam(required = true) String city) {
+//        return new ResponseEntity<>(weatherService.findCityIdByName(city), HttpStatus.OK);
+//    }
     @GetMapping("/weather")
-    public ResponseEntity<?> queryWeatherByCity(@RequestParam(required = true) String city) {
+    public ResponseEntity<?> queryWeatherByCity(@RequestParam(required = true) List<String> city) {
         return new ResponseEntity<>(weatherService.findCityIdByName(city), HttpStatus.OK);
     }
 

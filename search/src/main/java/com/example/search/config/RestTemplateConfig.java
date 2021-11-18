@@ -9,6 +9,7 @@ import java.time.Duration;
 
 @Configuration
 public class RestTemplateConfig {
+    // for sending request
     @Bean
     public RestTemplate getRestTemplate() {
         return new RestTemplateBuilder().setConnectTimeout(Duration.ofSeconds(5)).build();

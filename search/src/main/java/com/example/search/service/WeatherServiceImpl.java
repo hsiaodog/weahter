@@ -2,7 +2,7 @@ package com.example.search.service;
 
 
 import com.example.search.config.EndpointConfig;
-import com.example.search.pojo.City;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -11,27 +11,44 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 public class WeatherServiceImpl implements WeatherService{
 
     private final RestTemplate restTemplate;
 
-
+    @Autowired
     public WeatherServiceImpl(RestTemplate getRestTemplate) {
         this.restTemplate = getRestTemplate;
     }
 
+
+    //do retry while failed
     @Override
     @Retryable(include = IllegalAccessError.class)
-    public List<Integer> findCityIdByName(String city) {
-        City[] cities = restTemplate.getForObject(EndpointConfig.queryWeatherByCity + city, City[].class);
+    public List<Integer> findCityIdByName(List<String> city) {
+        String allCities = String.join(",", city);
         List<Integer> ans = new ArrayList<>();
-        for(City c: cities) {
-            if(c != null && c.getWoeid() != null) {
-                ans.add(c.getWoeid());
-            }
-        }
+        List<Integer> cityIds = restTemplate.getForObject(EndpointConfig.queryDetail+ "/nametoid?city=" + allCities, ArrayList.class);
+        ForkJoinPool pool = new ForkJoinPool();
+
+
+
+
+//        for (Integer c : cities) {
+//            if (c != null) {
+//                ans.add(c);
+//            }
+//        }
+//        System.out.println(allCities);
+//        System.out.println(city);
+//        System.out.println(ans);
+//        System.out.println("weather");
+
         return ans;
     }
 
@@ -46,6 +63,8 @@ public class WeatherServiceImpl implements WeatherService{
 /**
  *  -> gateway -> eureka
  *       |
+ *   load balance
+ *       |
  *   weather-search -> hystrix(thread pool) -> 3rd party weather api
  *
  *
@@ -56,7 +75,7 @@ public class WeatherServiceImpl implements WeatherService{
  *
  *   gateway
  *     |
- *  weather-service -> 3rd party api(id <-> weather)
+ *  weather-service -> (id1, id2, id3 + multi-thread)-> 3rd party api(id <-> weather)
  *    |
  *  detail-service -> 3rd party api (city <-> id)
  *
