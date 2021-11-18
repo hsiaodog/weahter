@@ -11,10 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
 
 @Service
 public class WeatherServiceImpl implements WeatherService{
@@ -30,20 +27,25 @@ public class WeatherServiceImpl implements WeatherService{
     //do retry while failed
     @Override
     @Retryable(include = IllegalAccessError.class)
-    public List<Integer> findCityIdByName(List<String> city) {
+    public List<Map<String, Map>> findCityIdByName(List<String> city) {
         String allCities = String.join(",", city);
-        List<Integer> ans = new ArrayList<>();
+        List<Map<String, Map>> ans = new ArrayList<>();
         List<Integer> cityIds = restTemplate.getForObject(EndpointConfig.queryDetail+ "/nametoid?city=" + allCities, ArrayList.class);
-        ForkJoinPool pool = new ForkJoinPool();
+//        ForkJoinPool pool = new ForkJoinPool();
+//        CompletableFuture<Map<String, Map>> future = CompletableFuture.supplyAsync(()-> {
+//           try{
+//               return restTemplate.getForObject(EndpointConfig.queryWeatherById + , HashMap.class);
+//           }catch (Exception e) {
+//
+//           }
+//        });
 
-
-
-
-//        for (Integer c : cities) {
-//            if (c != null) {
-//                ans.add(c);
-//            }
-//        }
+        for (Integer c : cityIds) {
+            if (c != null) {
+                Map<String, Map> weatherById = findCityNameById(c);
+                ans.add(weatherById);
+            }
+        }
 //        System.out.println(allCities);
 //        System.out.println(city);
 //        System.out.println(ans);
